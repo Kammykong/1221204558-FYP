@@ -1,0 +1,53 @@
+CREATE TABLE Buyers (
+    buyer_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE Items (
+    item_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    stock INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    buyer_id INT,
+    item_id INT,
+    quantity INT NOT NULL,
+    total_price DECIMAL(10, 2) GENERATED ALWAYS AS (quantity * (SELECT price FROM Items WHERE Items.item_id = Orders.item_id)) STORED,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (buyer_id) REFERENCES Buyers(buyer_id),
+    FOREIGN KEY (item_id) REFERENCES Items(item_id)
+);
+INSERT INTO Buyers (name, email, phone)
+VALUES ('John Doe', 'johndoe@example.com', '123-456-7890');
+INSERT INTO Items (name, description, price, stock)
+VALUES ('Laptop', 'A high-performance laptop suitable for programming', 799.99, 10);
+INSERT INTO Orders (buyer_id, item_id, quantity)
+VALUES (1, 1, 2);
+SELECT Orders.order_id, Buyers.name AS buyer_name, Items.name AS item_name, Orders.quantity, Orders.total_price, Orders.order_date
+FROM Orders
+JOIN Buyers ON Orders.buyer_id = Buyers.buyer_id
+JOIN Items ON Orders.item_id = Items.item_id
+WHERE Buyers.buyer_id = 1;
+
+UPDATE Buyers
+SET phone = '987-654-3210'
+WHERE buyer_id = 1;
+UPDATE Items
+SET stock = stock - 2
+WHERE item_id = 1;
+DELETE FROM Buyers
+WHERE buyer_id = 1;
+
+SELECT Orders.order_id, Buyers.name AS buyer_name, Items.name AS item_name, Orders.quantity, Orders.total_price, Orders.order_date
+FROM Orders
+JOIN Buyers ON Orders.buyer_id = Buyers.buyer_id
+JOIN Items ON Orders.item_id = Items.item_id;
+SELECT stock
+FROM Items
+WHERE item_id = 1;
